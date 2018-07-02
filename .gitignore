@@ -1,1 +1,8 @@
 .DS_Store
+__pycache__
+.ipynb_checkpoints
+2018-*
+old
+q
+r
+r.txt
