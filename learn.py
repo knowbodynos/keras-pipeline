@@ -72,11 +72,11 @@ raw_df_test = raw_df.drop(raw_df_train.index)
 X_df_test = X_df.drop(X_df_train.index)
 y_df_test = y_df.drop(y_df_train.index)
 
-X_train = X_df_train.as_matrix()
-y_train = y_df_train.as_matrix()
+X_train = X_df_train.values
+y_train = y_df_train.values
 
-X_test = X_df_test.as_matrix()
-y_test = y_df_test.as_matrix()
+X_test = X_df_test.values
+y_test = y_df_test.values
 
 # Define scaler
 scalerX = StandardScaler().fit(X_train)
@@ -136,7 +136,7 @@ y_df_test.to_csv(timestamp + "/y_test.csv")
 #     # The target (output) data
 #     extarget = exraw[targetkey]
 #     extarget = np.log(extarget)
-#     extarget = extarget.as_matrix()
+#     extarget = extarget.values
 
 #     expred = model.predict(exdata, batch_size=config.batch_size)
 
@@ -223,7 +223,7 @@ y_df_test.to_csv(timestamp + "/y_test.csv")
 #     # The target (output) data
 #     extarget = exraw[targetkey]
 #     extarget = np.log(extarget)
-#     extarget = extarget.as_matrix()
+#     extarget = extarget.values
 
 #     expred = model.predict(exdata, config.batch_size=config.batch_size)
 
