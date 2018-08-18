@@ -3,9 +3,9 @@ import sys
 import os
 import shutil
 import math
-import pymongo
 import pandas as pd
 import numpy as np
+from pymongo import MongoClient
 from datetime import datetime
 from pytz import utc
 #import matplotlib.pyplot as plt
@@ -38,17 +38,20 @@ config = load_model_config.Config()
 np.random.seed(config.rand_seed)
 
 # Load data
-client = pymongo.MongoClient("mongodb://manager:toric@129.10.135.170:27017/MLEARN")
+client = MongoClient("mongodb://manager:toric@129.10.135.170:27017/MLEARN")
 MLEARN = client.MLEARN
 OVERCOUNT = MLEARN.OVERCOUNT
 
-curs = OVERCOUNT.find({}, {"_id": 0}).hint([("H11", 1)])
+curs = OVERCOUNT.find({}, {"_id": 0, "POLYID": 0, "NVERTS": 0, "LNNFRTPREDICTSUM": 0}).hint([("H11", 1)])
 raw_df = pd.DataFrame(list(map(keras_helpers.flatten_doc, curs))).set_index("POLYID").astype(float).sample(frac = 1, random_state = config.rand_seed)
+
+client.close()
+
 # raw_df = raw_df.drop(columns = [x for x in raw_df.columns if "STDEV" in x])
 # y_df = pd.DataFrame((X_df["NFSRTPREDICT"] - X_df["NFSRT"]).rename("NFSRTDIFF"), index = X_df.index)
-y_df = raw_df[["NFSRTPREDICT", "NFSRT"]].apply(lambda x: x[1] / x[0], axis = 1).to_frame(name = "NFSRTRAT")
+y_df = raw_df[["LNNFRTSUM", "NFSRT"]].apply(lambda x: x[1] / np.exp(x[0]), axis = 1).to_frame(name = "NFSRTRAT")
 # y_df = X_df[["NFSRTPREDICT", "NFSRT"]].apply(lambda x: math.log10(x[0] / x[1]), axis = 1).to_frame(name = "NFSRTLOGRAT")
-X_df = raw_df.drop(columns = ["NFSRTPREDICT", "NFSRT"])
+X_df = raw_df.drop(columns = ["LNNFRTSUM", "NFSRT"])
 
 # X_df["NFSRTPREDICT"] = X_df["NFSRTPREDICT"].apply(math.log10)
 # y_df = X_df["NFSRT"].apply(math.log10).to_frame(name = "NFSRT")
