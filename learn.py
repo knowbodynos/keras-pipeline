@@ -42,7 +42,7 @@ client = MongoClient("mongodb://manager:toric@129.10.135.170:27017/MLEARN")
 MLEARN = client.MLEARN
 OVERCOUNT = MLEARN.OVERCOUNT
 
-curs = OVERCOUNT.find({}, {"_id": 0, "POLYID": 0, "NVERTS": 0, "LNNFRTPREDICTSUM": 0}).hint([("H11", 1)])
+curs = OVERCOUNT.find({"NFSRT": {"$exists": True}}, {"_id": 0, "NVERTS": 0, "LNNFRTPREDICTSUM": 0}).hint([("H11", 1)])
 raw_df = pd.DataFrame(list(map(keras_helpers.flatten_doc, curs))).set_index("POLYID").astype(float).sample(frac = 1, random_state = config.rand_seed)
 
 client.close()
