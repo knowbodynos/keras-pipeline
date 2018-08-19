@@ -53,14 +53,27 @@ y_df = raw_df[["LNNFRTSUM", "NFSRT"]].apply(lambda x: x[1] / np.exp(x[0]), axis 
 # y_df = X_df[["NFSRTPREDICT", "NFSRT"]].apply(lambda x: math.log10(x[0] / x[1]), axis = 1).to_frame(name = "NFSRTLOGRAT")
 X_df = raw_df.drop(columns = ["LNNFRTSUM", "NFSRT"])
 
+# Create correlation matrix
+corr_matrix = X_df.corr().abs()
+
+# Select upper triangle of correlation matrix
+upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k = 1).astype(np.bool))
+
+# Find index of feature columns with correlation greater than some threshold
+to_drop = [column for column in upper.columns if any(upper[column] > config.corr_thresh)]
+
+# Drop hightly correlated features
+X_df = X_df.drop(to_drop, axis = 1)
+
 # X_df["NFSRTPREDICT"] = X_df["NFSRTPREDICT"].apply(math.log10)
 # y_df = X_df["NFSRT"].apply(math.log10).to_frame(name = "NFSRT")
 # y_df = X_df["NFSRT"].to_frame(name = "NFSRT")
 # X_df = X_df.drop(columns = ["NFSRT"])
 
 # train_inds = ((X_df.H11 <= 4) | (X_df.H11 == 6)).nonzero()[0]
-train_poly_ids = pd.concat([X_df[X_df.H11 == h11].sample(frac = 0.7, random_state = config.rand_seed) for h11 in range(4, 6 + 1)], axis = 0)
-train_inds = X_df.index.isin(train_poly_ids.index).nonzero()[0]
+# train_poly_ids = pd.concat([X_df[X_df.H11 == h11].sample(frac = 0.7, random_state = config.rand_seed) for h11 in range(4, 6 + 1)], axis = 0)
+# train_inds = X_df.index.isin(train_poly_ids.index).nonzero()[0]
+train_inds = np.arange(X_df.shape[0])
 
 train_bound = int(config.train_split * train_inds.size)
 
